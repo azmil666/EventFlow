@@ -2,7 +2,8 @@
  * Dashboard component prop types
  * @typedef {Object} DashboardProps
  * @property {string} userId - User identifier
- * @property {'admin'|'participant'} role - User role
+ @property {'admin'|'participant'|'mentor'|'judge'} role - User role
+
  */
 
 /**
@@ -14,5 +15,7 @@
 
 export const DashboardRoles = {
   ADMIN: 'admin',
-  PARTICIPANT: 'participant'
+  PARTICIPANT: 'participant',
+  MENTOR: 'mentor',
+  JUDGE: 'judge'
 };
