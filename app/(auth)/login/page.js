@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from './login.module.css';
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -38,58 +37,161 @@ export default function LoginPage() {
     };
 
     return (
-        <div className={styles.container}>
-            <div className={styles.loginBox}>
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Welcome back</h2>
+        <div style={{
+            minHeight: "100vh",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundImage: "url(/auth-bg.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
+        }}>
+            <div style={{
+                width: "100%",
+                maxWidth: "400px",
+                padding: "40px",
+                borderRadius: "16px",
+                background: "rgba(15, 23, 42, 0.85)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                border: "1px solid rgba(255, 255, 255, 0.1)"
+            }}>
+                <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                    <h2 style={{ 
+                        fontSize: "32px", 
+                        fontWeight: "700", 
+                        color: "#ffffff",
+                        marginBottom: "8px"
+                    }}>
+                        Welcome back
+                    </h2>
+                    <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "14px" }}>
+                        Sign in to your account
+                    </p>
                 </div>
+
                 <form onSubmit={handleSubmit}>
-                    <div className="space-y-3 mt-4">
-                        <div>
-                            <label className="block text-sm font-medium text-white/80 uppercase">Email</label>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                disabled={loading}
-                                className="mt-1 block w-full rounded-lg border border-white/25 bg-white/10 px-4 py-2.5 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
-                                placeholder="you@example.com"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-white/80 uppercase">Password</label>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                disabled={loading}
-                                className="mt-1 block w-full rounded-lg border border-white/25 bg-white/10 px-4 py-2.5 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
-                                placeholder="••••••••"
-                            />
-                        </div>
+                    <div style={{ marginBottom: "20px" }}>
+                        <label style={{ 
+                            display: "block", 
+                            fontSize: "12px", 
+                            fontWeight: "600", 
+                            color: "rgba(255, 255, 255, 0.8)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            marginBottom: "8px"
+                        }}>
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={loading}
+                            style={{
+                                width: "100%",
+                                padding: "14px 16px",
+                                borderRadius: "10px",
+                                background: "rgba(255, 255, 255, 0.08)",
+                                border: "1px solid rgba(255, 255, 255, 0.15)",
+                                color: "#ffffff",
+                                fontSize: "15px",
+                                outline: "none",
+                                boxSizing: "border-box",
+                                transition: "all 0.2s"
+                            }}
+                            placeholder="Enter your email"
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: "24px" }}>
+                        <label style={{ 
+                            display: "block", 
+                            fontSize: "12px", 
+                            fontWeight: "600", 
+                            color: "rgba(255, 255, 255, 0.8)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            marginBottom: "8px"
+                        }}>
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={loading}
+                            style={{
+                                width: "100%",
+                                padding: "14px 16px",
+                                borderRadius: "10px",
+                                background: "rgba(255, 255, 255, 0.08)",
+                                border: "1px solid rgba(255, 255, 255, 0.15)",
+                                color: "#ffffff",
+                                fontSize: "15px",
+                                outline: "none",
+                                boxSizing: "border-box",
+                                transition: "all 0.2s"
+                            }}
+                            placeholder="Enter your password"
+                        />
                     </div>
 
                     {error && (
-                        <div className="mt-3 text-red-300 text-sm text-center bg-red-500/20 p-2 rounded-lg border border-red-500/30">
+                        <div style={{ 
+                            padding: "12px", 
+                            borderRadius: "8px",
+                            background: "rgba(239, 68, 68, 0.15)", 
+                            border: "1px solid rgba(239, 68, 68, 0.3)",
+                            color: "#fca5a5",
+                            fontSize: "13px",
+                            textAlign: "center",
+                            marginBottom: "16px"
+                        }}>
                             {error}
                         </div>
                     )}
 
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="mt-5 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-600/25 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? "Signing in..." : "Sign In"}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        style={{
+                            width: "100%",
+                            padding: "14px",
+                            borderRadius: "10px",
+                            background: loading ? "rgba(59, 130, 246, 0.6)" : "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                            color: "#ffffff",
+                            fontWeight: "600",
+                            fontSize: "15px",
+                            border: "none",
+                            cursor: loading ? "not-allowed" : "pointer",
+                            boxShadow: "0 4px 14px 0 rgba(59, 130, 246, 0.4)"
+                        }}
+                    >
+                        {loading ? "Signing in..." : "Sign In"}
+                    </button>
                 </form>
-                <div className="mt-4 text-center text-sm text-white/70">
+
+                <div style={{ 
+                    marginTop: "24px", 
+                    textAlign: "center", 
+                    fontSize: "14px",
+                    color: "rgba(255, 255, 255, 0.6)"
+                }}>
                     Don't have an account?{' '}
-                    <a href="/register" className="text-blue-400 hover:text-blue-300 hover:underline font-semibold transition">
+                    <a 
+                        href="/register" 
+                        style={{ 
+                            color: "#60a5fa", 
+                            fontWeight: "600",
+                            textDecoration: "none"
+                        }}
+                    >
                         Sign Up
                     </a>
                 </div>
