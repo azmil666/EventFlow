@@ -1,15 +1,14 @@
 'use client';
-import { Input, Label, FormField } from "@/components/ui/form";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Users, 
-  Calendar, 
-  Clock, 
-  Trophy, 
-  FileText, 
-  Star, 
+import {
+  Users,
+  Calendar,
+  Clock,
+  Trophy,
+  FileText,
+  Star,
   CheckCircle,
   AlertCircle,
   ChevronRight,
@@ -151,7 +150,7 @@ export default function JudgeDashboard() {
     if (!selectedSubmission) return;
 
     const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
-    
+
     // Create completed evaluation
     const newEvaluation = {
       id: Date.now(),
@@ -166,7 +165,7 @@ export default function JudgeDashboard() {
     setSubmissions(submissions.filter(s => s.id !== selectedSubmission.id));
     // Add to completed
     setCompletedEvaluations([newEvaluation, ...completedEvaluations]);
-    
+
     showNotification("Score submitted successfully!", "success");
     setShowScoreModal(false);
     setScores({ innovation: 0, feasibility: 0, presentation: 0, impact: 0, documentation: 0 });
@@ -219,11 +218,10 @@ export default function JudgeDashboard() {
     <div className="min-h-screen bg-slate-50">
       {/* Notification Toast */}
       {notification && (
-        <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
-          notification.type === "success" 
-            ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
-            : "bg-red-50 text-red-700 border border-red-200"
-        }`}>
+        <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 ${notification.type === "success"
+          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+          : "bg-red-50 text-red-700 border border-red-200"
+          }`}>
           {notification.type === "success" ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
           {notification.message}
         </div>
@@ -266,7 +264,7 @@ export default function JudgeDashboard() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -278,13 +276,13 @@ export default function JudgeDashboard() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-500 text-sm font-medium">Average Score</p>
                 <p className="text-2xl font-bold text-slate-900 mt-1">
-                  {completedEvaluations.length > 0 
+                  {completedEvaluations.length > 0
                     ? Math.round(completedEvaluations.reduce((a, b) => a + b.score, 0) / completedEvaluations.length)
                     : 0}
                 </p>
@@ -294,13 +292,13 @@ export default function JudgeDashboard() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-500 text-sm font-medium">Top Score</p>
                 <p className="text-2xl font-bold text-slate-900 mt-1">
-                  {completedEvaluations.length > 0 
+                  {completedEvaluations.length > 0
                     ? Math.max(...completedEvaluations.map(e => e.score))
                     : 0}
                 </p>
@@ -321,21 +319,19 @@ export default function JudgeDashboard() {
             <div className="flex gap-8 px-6">
               <button
                 onClick={() => setActiveTab("pending")}
-                className={`py-4 border-b-2 font-medium transition-colors ${
-                  activeTab === "pending"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-700"
-                }`}
+                className={`py-4 border-b-2 font-medium transition-colors ${activeTab === "pending"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
               >
                 Pending Reviews ({submissions.length})
               </button>
               <button
                 onClick={() => setActiveTab("completed")}
-                className={`py-4 border-b-2 font-medium transition-colors ${
-                  activeTab === "completed"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-700"
-                }`}
+                className={`py-4 border-b-2 font-medium transition-colors ${activeTab === "completed"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
               >
                 Completed ({completedEvaluations.length})
               </button>
@@ -346,11 +342,13 @@ export default function JudgeDashboard() {
           <div className="p-4 border-b border-slate-200">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <FormField>
-  <Label>Field Name</Label>
-  <Input type="text" />
-</FormField>
-
+              <input
+                type="text"
+                placeholder="Search by team or project name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-lg border-2 focus:ring-2  text-sm text-black"
+              />
             </div>
           </div>
 
@@ -485,11 +483,14 @@ export default function JudgeDashboard() {
                     <label className="text-sm font-medium text-slate-700">{criteria.label}</label>
                     <span className="text-sm text-slate-500">{scores[criteria.key]}/{criteria.max}</span>
                   </div>
-                 <FormField>
-  <Label>Field Name</Label>
-  <Input type="text" />
-</FormField>
-
+                  <input
+                    type="range"
+                    min={0}
+                    max={criteria.max}
+                    value={scores[criteria.key]}
+                    onChange={(e) => handleScoreChange(criteria.key, e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
                 </div>
               ))}
             </div>
