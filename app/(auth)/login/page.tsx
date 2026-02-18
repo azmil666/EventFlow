@@ -140,7 +140,7 @@ export default function LoginPage() {
                     fontSize: "14px",
                     color: "rgba(255, 255, 255, 0.6)"
                 }}>
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <a
                         href="/register"
                         style={{

@@ -293,7 +293,7 @@ export default function ParticipantDashboard() {
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Users className="w-10 h-10 text-blue-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">You don't have a team yet</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">You don&apos;t have a team yet</h2>
             <p className="text-slate-500 mb-8 max-w-md mx-auto">
               Create a new team or join an existing one using an invite code to start participating in events.
             </p>

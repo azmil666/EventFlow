@@ -10,7 +10,7 @@ export default function VerifyPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!certificateId.trim()) {
       setError('Please enter a certificate ID');
       return;
@@ -58,7 +58,7 @@ export default function VerifyPage() {
 
         <div className="mt-6 pt-6 border-t border-zinc-700">
           <p className="text-sm text-gray-400 text-center">
-            Example: Enter a certificate ID like "CERT-2024-001"
+            Example: Enter a certificate ID like &quot;CERT-2024-001&quot;
           </p>
         </div>
       </div>

@@ -31,7 +31,7 @@ const events = [
         status: "Coming Soon",
         description: "Innovate sustainable solutions for a better planet",
     },
-    
+
 ];
 
 export default function EventsPage() {
@@ -82,13 +82,12 @@ export default function EventsPage() {
                             >
                                 {/* Status Badge */}
                                 <div className="flex items-center justify-between mb-4">
-                                    <span className={`text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full ${
-                                        event.status === "Registration Open" 
+                                    <span className={`text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full ${event.status === "Registration Open"
                                             ? "bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30"
                                             : event.status === "Upcoming"
-                                            ? "bg-neon-violet/20 text-neon-violet border border-neon-violet/30"
-                                            : "bg-slate-700/50 text-slate-400 border border-slate-600/30"
-                                    }`}>
+                                                ? "bg-neon-violet/20 text-neon-violet border border-neon-violet/30"
+                                                : "bg-slate-700/50 text-slate-400 border border-slate-600/30"
+                                        }`}>
                                         {event.status}
                                     </span>
                                     <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
@@ -100,7 +99,7 @@ export default function EventsPage() {
                                 <h3 className="text-xl font-semibold text-white mb-3 tracking-wide group-hover:text-neon-cyan transition-colors">
                                     {event.title}
                                 </h3>
-                                
+
                                 {/* Description */}
                                 <p className="text-slate-400 leading-relaxed text-sm font-mono mb-6">
                                     {event.description}
@@ -119,8 +118,8 @@ export default function EventsPage() {
                                 </div>
 
                                 {/* Action Button */}
-                                <Link 
-                                    href={`/events/${event.id}`} 
+                                <Link
+                                    href={`/events/${event.id}`}
                                     className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 bg-white/5 text-white rounded-xl font-semibold hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-white/20 group-hover:border-neon-cyan/30"
                                 >
                                     View Event
@@ -140,7 +139,7 @@ export default function EventsPage() {
                             Want to Organize Your Own Event?
                         </h2>
                         <p className="text-lg text-slate-400 mb-8 font-mono">
-                            Create your hackathon or tech event with EventFlow's powerful platform.
+                            Create your hackathon or tech event with EventFlow&apos;s powerful platform.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link

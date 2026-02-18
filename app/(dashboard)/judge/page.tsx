@@ -45,14 +45,6 @@ export default function JudgeDashboard() {
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (status === "authenticated" && user?.id) {
-      fetchJudgeData(user.id);
-    } else if (status !== "loading") {
-      setLoading(false);
-    }
-  }, [status, user?.id]);
-
   const fetchJudgeData = async (userId) => {
     try {
       // In a real app, this would fetch from API
@@ -136,6 +128,16 @@ export default function JudgeDashboard() {
     }
   };
 
+  useEffect(() => {
+    if (status === "authenticated" && user?.id) {
+      fetchJudgeData(user.id);
+    } else if (status !== "loading") {
+      setLoading(false);
+    }
+  }, [status, user?.id]);
+
+
+
   const handleOpenEvaluation = (submission) => {
     setSelectedSubmission(submission);
     setShowScoreModal(true);
@@ -152,6 +154,7 @@ export default function JudgeDashboard() {
 
     // Create completed evaluation
     const newEvaluation = {
+      // eslint-disable-next-line react-hooks/purity
       id: Date.now(),
       teamName: selectedSubmission.teamName,
       projectName: selectedSubmission.projectName,

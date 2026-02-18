@@ -11,16 +11,38 @@ interface Props {
 
 export default async function VerifyCertificate({ params }: Props) {
   const { certificateId } = await params;
-  await dbConnect();
 
-  // Use aggregation with $limit to avoid TypeScript issues
-  const certificates = await mongoose.connection.db
-    .collection('certificates')
-    .find({ certificateId })
-    .limit(1)
-    .toArray();
+  let certificate = null;
 
-  const certificate = certificates[0] || null;
+  try {
+    await dbConnect();
+
+    // Use aggregation with $limit to avoid TypeScript issues
+    const certificates = await mongoose.connection.db
+      .collection('certificates')
+      .find({ certificateId })
+      .limit(1)
+      .toArray();
+
+    certificate = certificates[0] || null;
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <div className="text-center p-6 bg-zinc-900 rounded-xl border border-red-500/20">
+          <h1 className="text-2xl font-bold text-red-500 mb-2">
+            System Error
+          </h1>
+          <p className="text-gray-400">
+            Unable to verify certificate at this time. Please try again later.
+          </p>
+          <div className="mt-4 text-xs text-zinc-600 font-mono text-left bg-black p-2 rounded overflow-auto max-w-sm mx-auto">
+            {error instanceof Error ? error.message : "Unknown error"}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!certificate) {
     return (

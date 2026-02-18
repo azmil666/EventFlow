@@ -180,7 +180,7 @@ export default function AdminDashboard() {
               Dashboard Overview
             </h1>
             <p className="text-slate-400 font-mono text-sm">
-              Welcome back! Here's what's happening with your events.
+              Welcome back! Here&apos;s what&apos;s happening with your events.
             </p>
           </div>
 
