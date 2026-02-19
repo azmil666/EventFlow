@@ -8,6 +8,7 @@ export async function POST(req, { params }) {
   try {
     await dbConnect();
     const session = await auth();
+    const { id } = await params;
 
     if (!session || (session.user.role !== "admin" && session.user.role !== "organizer")) {
       return NextResponse.json(
@@ -15,8 +16,6 @@ export async function POST(req, { params }) {
         { status: 403 }
       );
     }
-
-    const { id } = params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(

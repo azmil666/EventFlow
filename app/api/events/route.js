@@ -9,33 +9,43 @@ const eventSchema = z.object({
   description: z.string().min(1, "Description is required"),
   startDate: z.string().or(z.date()).transform((val) => new Date(val)),
   endDate: z.string().or(z.date()).transform((val) => new Date(val)),
-  registrationDeadline: z.string().or(z.date()).optional().transform((val) => val ? new Date(val) : null),
+  registrationDeadline: z.string().or(z.date()).optional().nullable().transform((val) => val ? new Date(val) : null),
   rules: z.array(z.string()).optional(),
   tracks: z.array(z.string()).optional(),
-  status: z.enum(["upcoming", "ongoing", "ended"]).optional(),
+  status: z.enum(["draft", "upcoming", "ongoing", "completed", "ended"]).optional(),
+  modules: z.object({
+    judging: z.boolean().optional(),
+    certificates: z.boolean().optional(),
+    gallery: z.boolean().optional(),
+    teams: z.boolean().optional(),
+  }).optional(),
 });
 
 // GET all events
 export async function GET(request) {
-  await dbConnect();
-  const { searchParams } = new URL(request.url);
-  const status = searchParams.get('status');
-  
-  let query = {};
-  if (status) {
-    // Handle comma-separated statuses (e.g., "upcoming,ongoing")
-    if (status.includes(',')) {
-      query.status = { $in: status.split(',') };
-    } else {
-      query.status = status;
-    }
-  }
-  
-  const events = await Event.find(query)
-    .populate('organizer', 'name email')
-    .sort({ createdAt: -1 });
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
     
-  return NextResponse.json({ events });
+    let query = {};
+    if (status) {
+      if (status.includes(',')) {
+        query.status = { $in: status.split(',') };
+      } else {
+        query.status = status;
+      }
+    }
+    
+    const events = await Event.find(query)
+      .populate('organizer', 'name email')
+      .sort({ createdAt: -1 });
+      
+    return NextResponse.json({ events });
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+  }
 }
 
 // CREATE event
@@ -50,6 +60,7 @@ export async function POST(request) {
     }
 
     const body = await request.json();
+    
     const validation = eventSchema.safeParse(body);
 
     if (!validation.success) {
@@ -67,7 +78,8 @@ export async function POST(request) {
       registrationDeadline,
       rules,
       tracks,
-      status
+      status,
+      modules
     } = validation.data;
     
     const event = await Event.create({
@@ -79,10 +91,14 @@ export async function POST(request) {
       organizer: session.user.id,
       rules: rules || [],
       tracks: tracks || [],
-      status: status || "upcoming"
+      status: status || "draft",
+      modules: modules || {
+        judging: true,
+        certificates: true,
+        gallery: true,
+        teams: true
+      }
     });
-    
-    await event.populate('organizer', 'name email');
     
     return NextResponse.json({ event }, { status: 201 });
   } catch (error) {
@@ -93,4 +109,3 @@ export async function POST(request) {
     );
   }
 }
-

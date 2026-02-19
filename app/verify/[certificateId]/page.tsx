@@ -1,7 +1,8 @@
-
 import dbConnect from "@/lib/db-connect";
-import mongoose from "mongoose";
-import { notFound } from "next/navigation";
+import Certificate from "@/models/Certificate";
+import Event from "@/models/Event"; // Import to ensure model is registered
+import Link from "next/link";
+import { CheckCircle, XCircle, Calendar, User, Award, Download } from "lucide-react";
 
 interface Props {
   params: Promise<{
@@ -12,33 +13,30 @@ interface Props {
 export default async function VerifyCertificate({ params }: Props) {
   const { certificateId } = await params;
 
+  await dbConnect();
+
   let certificate = null;
+  let error = null;
 
   try {
-    await dbConnect();
+    certificate = await Certificate.findOne({ certificateId }).populate("event");
+  } catch (err) {
+    console.error("Error fetching certificate:", err);
+    error = "System error occurred while verifying certificate.";
+  }
 
-    // Use aggregation with $limit to avoid TypeScript issues
-    const certificates = await mongoose.connection.db
-      .collection('certificates')
-      .find({ certificateId })
-      .limit(1)
-      .toArray();
-
-    certificate = certificates[0] || null;
-  } catch (error) {
-    console.error("Database connection error:", error);
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="text-center p-6 bg-zinc-900 rounded-xl border border-red-500/20">
-          <h1 className="text-2xl font-bold text-red-500 mb-2">
-            System Error
-          </h1>
-          <p className="text-gray-400">
-            Unable to verify certificate at this time. Please try again later.
-          </p>
-          <div className="mt-4 text-xs text-zinc-600 font-mono text-left bg-black p-2 rounded overflow-auto max-w-sm mx-auto">
-            {error instanceof Error ? error.message : "Unknown error"}
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-space-900 text-white p-4">
+        <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-slate-700">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-900/30 mb-6">
+                <XCircle className="h-10 w-10 text-red-500" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Verification Error</h1>
+            <p className="text-slate-400 mb-6">{error}</p>
+            <Link href="/verify" className="text-indigo-400 hover:text-indigo-300 font-medium">
+                Try again
+            </Link>
         </div>
       </div>
     );
@@ -46,47 +44,91 @@ export default async function VerifyCertificate({ params }: Props) {
 
   if (!certificate) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-red-500">
-            ❌ Invalid Certificate
-          </h1>
-          <p className="mt-4 text-gray-400">
-            The certificate ID provided does not exist.
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-space-900 text-white p-4">
+        <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-slate-700">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-900/30 mb-6">
+                <XCircle className="h-10 w-10 text-red-500" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Invalid Certificate</h1>
+            <p className="text-slate-400 mb-6">
+                The certificate ID <span className="font-mono text-slate-300 bg-slate-900 px-2 py-1 rounded">{certificateId}</span> could not be found.
+            </p>
+            <Link href="/verify" className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                Verify Another
+            </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white">
-      <div className="bg-zinc-900 p-8 rounded-xl shadow-lg w-full max-w-lg">
-        <h1 className="text-2xl font-bold text-green-400 mb-6">
-          ✅ Certificate Verified
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-space-900 text-white p-4 relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="space-y-3">
-          <p>
-            <span className="font-semibold">Name:</span>{" "}
-            {certificate.participantName}
-          </p>
-          <p>
-            <span className="font-semibold">Event:</span>{" "}
-            {certificate.eventName}
-          </p>
-          <p>
-            <span className="font-semibold">Role:</span>{" "}
-            {certificate.role}
-          </p>
-          <p>
-            <span className="font-semibold">Issued On:</span>{" "}
-            {new Date(certificate.createdAt).toLocaleDateString()}
-          </p>
-          <p>
-            <span className="font-semibold">Certificate ID:</span>{" "}
-            {certificate.certificateId}
-          </p>
+      <div className="bg-slate-800/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-700/50 relative z-10">
+        <div className="flex flex-col items-center text-center mb-8">
+            <div className="h-20 w-20 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
+                <CheckCircle className="h-12 w-12 text-green-400" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Certificate Verified</h1>
+            <p className="text-slate-400">This certificate is valid and authentic.</p>
+        </div>
+
+        <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1 block">Recipient</label>
+                    <div className="flex items-center gap-2 text-lg font-medium text-white">
+                        <User className="h-5 w-5 text-indigo-400" />
+                        {certificate.recipientName}
+                    </div>
+                </div>
+                <div>
+                    <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1 block">Role</label>
+                    <div className="flex items-center gap-2 text-lg font-medium text-white capitalize">
+                        <Award className="h-5 w-5 text-purple-400" />
+                        {certificate.role}
+                    </div>
+                </div>
+                <div className="md:col-span-2">
+                    <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1 block">Event</label>
+                    <div className="flex items-center gap-2 text-xl font-bold text-white">
+                        <Calendar className="h-5 w-5 text-cyan-400" />
+                        {certificate.event?.title || "Unknown Event"}
+                    </div>
+                     <p className="text-sm text-slate-400 mt-1 ml-7">
+                        {certificate.event ? new Date(certificate.event.startDate).toLocaleDateString() : ""}
+                    </p>
+                </div>
+                <div className="md:col-span-2">
+                    <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1 block">Certificate ID</label>
+                    <code className="block bg-black/30 p-3 rounded text-indigo-300 font-mono text-sm break-all">
+                        {certificate.certificateId}
+                    </code>
+                </div>
+            </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {certificate.certificateUrl && (
+                <a 
+                    href={certificate.certificateUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
+                    <Download className="h-5 w-5" />
+                    Download PDF
+                </a>
+            )}
+            <Link 
+                href="/verify"
+                className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+                Verify Another
+            </Link>
         </div>
       </div>
     </div>

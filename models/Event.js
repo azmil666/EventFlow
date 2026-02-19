@@ -35,6 +35,12 @@ const EventSchema = new mongoose.Schema(
         },
         rules: [String],
         tracks: [String],
+        modules: {
+            judging: { type: Boolean, default: true },
+            certificates: { type: Boolean, default: true },
+            gallery: { type: Boolean, default: true },
+            teams: { type: Boolean, default: true },
+        },
     },
     { timestamps: true }
 );

@@ -1,21 +1,23 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db-connect";
+import dbConnect from "@/lib/db-connect";
 import Announcement from "@/models/Announcement";
 import { auth } from "@/auth";
 import { z } from "zod";
 
 const announcementSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  content: z.string().min(1, "Content is required"),
+  message: z.string().min(1, "Message is required"),
+  roleTarget: z.enum(["all", "participants", "judges", "mentors"]).optional(),
   isActive: z.boolean().optional(),
-  expiresAt: z.string().or(z.date()).optional().transform((val) => val ? new Date(val) : null),
+  expiresAt: z.string().or(z.date()).optional().nullable().transform((val) => val ? new Date(val) : null),
 });
 
 /* GET — Fetch active announcements */
 export async function GET() {
   try {
-    await connectDB();
+    await dbConnect();
 
+    // Fetch active announcements that haven't expired
     const announcements = await Announcement.find({
       isActive: true,
       $or: [
@@ -28,6 +30,7 @@ export async function GET() {
 
     return NextResponse.json(announcements);
   } catch (error) {
+    console.error("Error fetching announcements:", error);
     return NextResponse.json(
       { error: "Failed to fetch announcements" },
       { status: 500 }
@@ -38,12 +41,12 @@ export async function GET() {
 /* POST — Create announcement (organizers only) */
 export async function POST(req) {
   try {
-    await connectDB();
-
+    await dbConnect();
     const session = await auth();
 
-    if (!session || (session.user.role !== "admin" && session.user.role !== "organizer"))
+    if (!session || (session.user.role !== "admin" && session.user.role !== "organizer")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
     const body = await req.json();
     const validation = announcementSchema.safeParse(body);
@@ -62,6 +65,7 @@ export async function POST(req) {
 
     return NextResponse.json(announcement, { status: 201 });
   } catch (error) {
+    console.error("Error creating announcement:", error);
     return NextResponse.json(
       { error: "Failed to create announcement" },
       { status: 500 }
@@ -69,23 +73,26 @@ export async function POST(req) {
   }
 }
 
-
 /* DELETE — deactivate announcement */
 export async function DELETE(req) {
   try {
-    await connectDB();
-
+    await dbConnect();
     const session = await auth();
 
-    if (!session || (session.user.role !== "admin" && session.user.role !== "organizer"))
+    if (!session || (session.user.role !== "admin" && session.user.role !== "organizer")) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
     const { id } = await req.json();
+    if (!id) {
+        return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    }
 
     await Announcement.findByIdAndUpdate(id, { isActive: false });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Error deleting announcement:", error);
     return NextResponse.json(
       { error: "Failed to delete announcement" },
       { status: 500 }
