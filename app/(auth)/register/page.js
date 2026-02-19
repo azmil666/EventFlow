@@ -1,79 +1,53 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import Aurora from "@/components/common/Aurora";
+import Navbar from "@/components/common/Navbar";
 import { validateRegister } from "@/utils/validateRegister";
 
-/* ---------------------- styles ---------------------- */
-
 const styles = {
-  page: {
-    minHeight: "100vh",
-    width: "100%",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "24px",
-    backgroundImage: "url(/auth-bg.jpg)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  },
-  card: {
-    width: "100%",
-    maxWidth: "440px",
-    padding: "40px",
-    borderRadius: "16px",
-    background: "rgba(15, 23, 42, 0.85)",
-    backdropFilter: "blur(20px)",
-    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-    border: "1px solid rgba(255,255,255,0.1)",
-  },
-  input: {
-    width: "100%",
-    padding: "14px 16px",
-    borderRadius: "10px",
-    background: "rgba(255,255,255,0.08)",
-    border: "1px solid rgba(255,255,255,0.15)",
-    color: "#fff",
-    fontSize: "15px",
-  },
   label: {
-    fontSize: "12px",
-    fontWeight: 600,
-    color: "rgba(255,255,255,0.8)",
-    marginBottom: "8px",
     display: "block",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.8)",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    marginBottom: "8px",
   },
 };
 
-/* ---------------------- InputField ---------------------- */
-
-function InputField({ label, type, name, value, onChange, disabled, placeholder, error }: any) {
+function InputField({ label, type, name, value, onChange, disabled, placeholder, error }) {
   return (
-    <div style={{ marginBottom: 20 }}>
-      <label style={styles.label}>{label}</label>
-
+    <div style={{ marginBottom: "20px" }}>
+      <label style={styles.label} htmlFor={name}>
+        {label}
+      </label>
       <input
+        id={name}
         name={name}
         type={type}
+        required
         value={value}
         onChange={onChange}
         disabled={disabled}
-        placeholder={placeholder}
+        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/40 transition"
         style={{
-          ...styles.input,
-          border: error ? "1px solid #ef4444" : styles.input.border,
+          border: error ? "1px solid #ef4444" : undefined
         }}
+        placeholder={placeholder}
       />
-
-      {error && <p style={{ color: "#f87171", fontSize: 12 }}>{error}</p>}
+      {error && (
+        <p style={{ color: "#f87171", fontSize: "12px", marginTop: "6px" }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }
-
-/* ---------------------- Page ---------------------- */
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -85,33 +59,39 @@ export default function RegisterPage() {
     role: "participant",
   });
 
-  const [errors, setErrors] = useState<any>({});
-
   const [status, setStatus] = useState({
     error: "",
     success: "",
     loading: false,
   });
+  const [errors, setErrors] = useState({});
 
-  const handleChange = (e: any) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((p) => ({ ...p, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
     if (errors[name]) {
-      setErrors((p: any) => ({ ...p, [name]: "" }));
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
     }
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationErrors = validateRegister(formData);
-    if (Object.keys(validationErrors).length) {
+    if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
+    setErrors({});
     setStatus({ error: "", success: "", loading: true });
 
     try {
@@ -123,18 +103,20 @@ export default function RegisterPage() {
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
 
       setStatus({
         error: "",
-        success: "Registration successful! Redirecting...",
+        success: "Registration successful! Redirecting to login...",
         loading: false,
       });
 
       setTimeout(() => router.push("/login"), 1500);
-    } catch (err: any) {
+    } catch (err) {
       setStatus({
-        error: err.message || "Something went wrong",
+        error: err.message || "Something went wrong.",
         success: "",
         loading: false,
       });
@@ -142,53 +124,121 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={{ textAlign: "center", color: "white", marginBottom: 30 }}>
-          Create Account
-        </h2>
+    <main className="bg-space-900 relative min-h-screen">
+      <Navbar />
 
-        <form onSubmit={handleSubmit}>
-          <InputField label="Full Name" name="name" type="text" value={formData.name} onChange={handleChange} disabled={status.loading} placeholder="Enter name" error={errors.name} />
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <Aurora
+          colorStops={["#00ff87", "#60a5fa", "#00ff87"]}
+          amplitude={1}
+          blend={0.6}
+          speed={0.8}
+        />
+      </div>
 
-          <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} disabled={status.loading} placeholder="Enter email" error={errors.email} />
+      <section className="relative z-10 flex justify-center py-32 px-4">
+        <div className="glass-card border-glow w-full max-w-md rounded-2xl p-10 backdrop-blur-xl">
 
-          <InputField label="Password" name="password" type="password" value={formData.password} onChange={handleChange} disabled={status.loading} placeholder="Create password" error={errors.password} />
+          <div className="relative mb-8">
+            <button
+              onClick={() => router.push("/")}
+              className="absolute -top-2 -left-2 p-2 rounded-lg text-slate-400 hover:text-neon-cyan hover:bg-white/5 transition"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
 
-          <div style={{ marginBottom: 20 }}>
-            <label style={styles.label}>Role</label>
-            <select name="role" value={formData.role} onChange={handleChange} style={styles.input}>
-              <option value="participant">Participant</option>
-              <option value="mentor">Mentor</option>
-              <option value="judge">Judge</option>
-            </select>
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
+                Create Account
+              </h2>
+              <p className="text-slate-400 text-sm font-mono">
+                Join EventFlow and start organizing
+              </p>
+            </div>
           </div>
 
-          {status.error && <p style={{ color: "#f87171" }}>{status.error}</p>}
-          {status.success && <p style={{ color: "#4ade80" }}>{status.success}</p>}
+          <form onSubmit={handleSubmit}>
+            <InputField
+              label="Full Name"
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              disabled={status.loading}
+              placeholder="Enter your name"
+              error={errors.name}
+            />
 
-          <button
-            type="submit"
-            disabled={status.loading}
-            style={{
-              width: "100%",
-              padding: 14,
-              borderRadius: 10,
-              border: "none",
-              background: "#3b82f6",
-              color: "white",
-              marginTop: 10,
-              cursor: "pointer",
-            }}
-          >
-            {status.loading ? "Creating..." : "Sign Up"}
-          </button>
+            <InputField
+              label="Email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={status.loading}
+              placeholder="Enter your email"
+              error={errors.email}
+            />
 
-          <p style={{ textAlign: "center", marginTop: 20, color: "#9ca3af" }}>
-            Already have an account? <Link href="/login">Sign in</Link>
-          </p>
-        </form>
-      </div>
-    </div>
+            <InputField
+              label="Password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              disabled={status.loading}
+              placeholder="Create a password"
+              error={errors.password}
+            />
+
+            <div style={{ marginBottom: "24px" }}>
+              <label style={styles.label}>I am a</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                disabled={status.loading}
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/40 transition"
+              >
+                <option value="participant">Participant</option>
+                <option value="mentor">Mentor</option>
+                <option value="judge">Judge</option>
+              </select>
+            </div>
+
+            {status.error && (
+              <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-center mb-4">
+                {status.error}
+              </div>
+            )}
+
+            {status.success && (
+              <div className="text-green-400 text-sm bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-center mb-4">
+                {status.success}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={status.loading}
+              className="btn-neon w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold tracking-wide text-sm"
+            >
+              {status.loading ? "Creating Account..." : "Sign Up"}
+              {!status.loading && <ArrowRight className="w-4 h-4" />}
+            </button>
+
+            <div className="mt-6 text-center text-sm text-slate-500 font-mono">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-neon-cyan hover:text-white transition"
+              >
+                Sign In
+              </Link>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
   );
 }
