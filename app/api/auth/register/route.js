@@ -13,7 +13,7 @@ const registerSchema = z.object({
     name: z.string().min(2).max(50),
     email: z.string().email(),
     password: z.string().min(8).max(100),
-    role: z.enum(["admin", "participant", "mentor", "judge"]).optional(),
+    role: z.enum(["participant", "mentor", "judge"]).optional(),
 });
 
 export async function POST(request) {
@@ -45,12 +45,12 @@ export async function POST(request) {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new user
+        // Create new user - always default to participant role
         const user = await User.create({
             name,
             email,
             password: hashedPassword,
-            role: role || "participant",
+            role: "participant",
         });
 
         return NextResponse.json(

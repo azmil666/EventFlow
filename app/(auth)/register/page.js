@@ -1,230 +1,194 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { validateRegister } from "@/utils/validateRegister";
+
+/* ---------------------- styles ---------------------- */
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "24px",
+    backgroundImage: "url(/auth-bg.jpg)",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  },
+  card: {
+    width: "100%",
+    maxWidth: "440px",
+    padding: "40px",
+    borderRadius: "16px",
+    background: "rgba(15, 23, 42, 0.85)",
+    backdropFilter: "blur(20px)",
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+    border: "1px solid rgba(255,255,255,0.1)",
+  },
+  input: {
+    width: "100%",
+    padding: "14px 16px",
+    borderRadius: "10px",
+    background: "rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.15)",
+    color: "#fff",
+    fontSize: "15px",
+  },
+  label: {
+    fontSize: "12px",
+    fontWeight: 600,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: "8px",
+    display: "block",
+  },
+};
+
+/* ---------------------- InputField ---------------------- */
+
+function InputField({ label, type, name, value, onChange, disabled, placeholder, error }: any) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <label style={styles.label}>{label}</label>
+
+      <input
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        placeholder={placeholder}
+        style={{
+          ...styles.input,
+          border: error ? "1px solid #ef4444" : styles.input.border,
+        }}
+      />
+
+      {error && <p style={{ color: "#f87171", fontSize: 12 }}>{error}</p>}
+    </div>
+  );
+}
+
+/* ---------------------- Page ---------------------- */
 
 export default function RegisterPage() {
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [role, setRole] = useState("participant");
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
+  const router = useRouter();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        setSuccess("");
-        setLoading(true);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "participant",
+  });
 
-        try {
-            const res = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password, role }),
-            });
+  const [errors, setErrors] = useState<any>({});
 
-            const data = await res.json();
+  const [status, setStatus] = useState({
+    error: "",
+    success: "",
+    loading: false,
+  });
 
-            if (res.ok) {
-                setSuccess("Registration successful! Redirecting to login...");
-                setTimeout(() => router.push("/login"), 1500);
-            } else {
-                setError(data.error || "Registration failed");
-            }
-        } catch (err) {
-            setError("Something went wrong. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
 
-    const inputStyle = {
-        width: "100%",
-        padding: "14px 16px",
-        borderRadius: "10px",
-        background: "rgba(255, 255, 255, 0.08)",
-        border: "1px solid rgba(255, 255, 255, 0.15)",
-        color: "#ffffff",
-        fontSize: "15px",
-        outline: "none",
-        boxSizing: "border-box",
-    };
+    setFormData((p) => ({ ...p, [name]: value }));
 
-    const labelStyle = {
-        display: "block",
-        fontSize: "12px",
-        fontWeight: "600",
-        color: "rgba(255, 255, 255, 0.8)",
-        textTransform: "uppercase",
-        letterSpacing: "0.5px",
-        marginBottom: "8px"
-    };
+    if (errors[name]) {
+      setErrors((p: any) => ({ ...p, [name]: "" }));
+    }
+  };
 
-    return (
-        <div style={{
-            minHeight: "100vh",
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "24px",
-            backgroundImage: "url(/auth-bg.jpg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat"
-        }}>
-            <div style={{
-                width: "100%",
-                maxWidth: "440px",
-                padding: "40px",
-                borderRadius: "16px",
-                background: "rgba(15, 23, 42, 0.85)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-                border: "1px solid rgba(255, 255, 255, 0.1)"
-            }}>
-                <div style={{ textAlign: "center", marginBottom: "32px" }}>
-                    <h2 style={{
-                        fontSize: "32px",
-                        fontWeight: "700",
-                        color: "#ffffff",
-                        marginBottom: "8px"
-                    }}>
-                        Create Account
-                    </h2>
-                    <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "14px" }}>
-                        Join EventFlow today
-                    </p>
-                </div>
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
-                <form onSubmit={handleSubmit}>
+    const validationErrors = validateRegister(formData);
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
+      return;
+    }
 
-                    <div style={{ marginBottom: "20px" }}>
-                        <label style={labelStyle}>Full Name</label>
-                        <input
-                            type="text"
-                            required
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            disabled={loading}
-                            style={inputStyle}
-                            placeholder="Enter your name"
-                        />
-                    </div>
+    setStatus({ error: "", success: "", loading: true });
 
-                    <div style={{ marginBottom: "20px" }}>
-                        <label style={labelStyle}>Email</label>
-                        <input
-                            type="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            disabled={loading}
-                            style={inputStyle}
-                            placeholder="Enter your email"
-                        />
-                    </div>
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-                    <div style={{ marginBottom: "20px" }}>
-                        <label style={labelStyle}>Password</label>
-                        <input
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            disabled={loading}
-                            style={inputStyle}
-                            placeholder="Create a password"
-                        />
-                    </div>
+      const data = await res.json();
 
-                    <div style={{ marginBottom: "24px" }}>
-                        <label style={labelStyle}>I am a</label>
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            disabled={loading}
-                            style={inputStyle}
-                        >
-                            <option value="participant" style={{ color: "#1f2937" }}>Participant</option>
-                            <option value="mentor" style={{ color: "#1f2937" }}>Mentor</option>
-                            <option value="judge" style={{ color: "#1f2937" }}>Judge</option>
-                            <option value="admin" style={{ color: "#1f2937" }}>Admin</option>
-                        </select>
-                    </div>
+      if (!res.ok) throw new Error(data.error);
 
-                    {error && (
-                        <div style={{
-                            padding: "12px",
-                            borderRadius: "8px",
-                            background: "rgba(239, 68, 68, 0.15)",
-                            border: "1px solid rgba(239, 68, 68, 0.3)",
-                            color: "#fca5a5",
-                            fontSize: "13px",
-                            textAlign: "center",
-                            marginBottom: "16px"
-                        }}>
-                            {error}
-                        </div>
-                    )}
+      setStatus({
+        error: "",
+        success: "Registration successful! Redirecting...",
+        loading: false,
+      });
 
-                    {success && (
-                        <div style={{
-                            padding: "12px",
-                            borderRadius: "8px",
-                            background: "rgba(34, 197, 94, 0.15)",
-                            border: "1px solid rgba(34, 197, 94, 0.3)",
-                            color: "#86efac",
-                            fontSize: "13px",
-                            textAlign: "center",
-                            marginBottom: "16px"
-                        }}>
-                            {success}
-                        </div>
-                    )}
+      setTimeout(() => router.push("/login"), 1500);
+    } catch (err: any) {
+      setStatus({
+        error: err.message || "Something went wrong",
+        success: "",
+        loading: false,
+      });
+    }
+  };
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        style={{
-                            width: "100%",
-                            padding: "14px",
-                            borderRadius: "10px",
-                            background: loading ? "rgba(59, 130, 246, 0.6)" : "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                            color: "#ffffff",
-                            fontWeight: "600",
-                            fontSize: "15px",
-                            border: "none",
-                            cursor: loading ? "not-allowed" : "pointer",
-                            boxShadow: "0 4px 14px 0 rgba(59, 130, 246, 0.4)"
-                        }}
-                    >
-                        {loading ? "Creating account..." : "Sign Up"}
-                    </button>
+  return (
+    <div style={styles.page}>
+      <div style={styles.card}>
+        <h2 style={{ textAlign: "center", color: "white", marginBottom: 30 }}>
+          Create Account
+        </h2>
 
-                    <div style={{
-                        marginTop: "24px",
-                        textAlign: "center",
-                        fontSize: "14px",
-                        color: "rgba(255, 255, 255, 0.6)"
-                    }}>
-                        Already have an account?{' '}
-                        <a
-                            href="/login"
-                            style={{
-                                color: "#60a5fa",
-                                fontWeight: "600",
-                                textDecoration: "none"
-                            }}
-                        >
-                            Sign In
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
+        <form onSubmit={handleSubmit}>
+          <InputField label="Full Name" name="name" type="text" value={formData.name} onChange={handleChange} disabled={status.loading} placeholder="Enter name" error={errors.name} />
+
+          <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} disabled={status.loading} placeholder="Enter email" error={errors.email} />
+
+          <InputField label="Password" name="password" type="password" value={formData.password} onChange={handleChange} disabled={status.loading} placeholder="Create password" error={errors.password} />
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={styles.label}>Role</label>
+            <select name="role" value={formData.role} onChange={handleChange} style={styles.input}>
+              <option value="participant">Participant</option>
+              <option value="mentor">Mentor</option>
+              <option value="judge">Judge</option>
+            </select>
+          </div>
+
+          {status.error && <p style={{ color: "#f87171" }}>{status.error}</p>}
+          {status.success && <p style={{ color: "#4ade80" }}>{status.success}</p>}
+
+          <button
+            type="submit"
+            disabled={status.loading}
+            style={{
+              width: "100%",
+              padding: 14,
+              borderRadius: 10,
+              border: "none",
+              background: "#3b82f6",
+              color: "white",
+              marginTop: 10,
+              cursor: "pointer",
+            }}
+          >
+            {status.loading ? "Creating..." : "Sign Up"}
+          </button>
+
+          <p style={{ textAlign: "center", marginTop: 20, color: "#9ca3af" }}>
+            Already have an account? <Link href="/login">Sign in</Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
 }
