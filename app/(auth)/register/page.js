@@ -106,12 +106,21 @@ export default function RegisterPage() {
     loading: false,
   });
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
+ const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+
+  if (errors[name]) {
+    setErrors((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: "",
     }));
-  };
+  }
+};
 
  const handleSubmit = async (e) => {
   e.preventDefault();
@@ -271,6 +280,7 @@ export default function RegisterPage() {
     </div>
   );
 }
+
 
 
 
