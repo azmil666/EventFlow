@@ -60,7 +60,7 @@ const styles = {
   },
 };
 
-function InputField({ label, type, name, value, onChange, disabled, placeholder }) {
+function InputField({ label, type, name, value, onChange, disabled, placeholder, error }) {
   return (
     <div style={{ marginBottom: "20px" }}>
       <label style={styles.label} htmlFor={name}>
@@ -74,12 +74,21 @@ function InputField({ label, type, name, value, onChange, disabled, placeholder 
         value={value}
         onChange={onChange}
         disabled={disabled}
-        style={styles.input}
+        style={{
+          ...styles.input,
+          border: error ? "1px solid #ef4444" : styles.input.border
+        }}
         placeholder={placeholder}
       />
+      {error && (
+        <p style={{ color: "#f87171", fontSize: "12px", marginTop: "6px" }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }
+
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -260,4 +269,5 @@ export default function RegisterPage() {
     </div>
   );
 }
+
 
