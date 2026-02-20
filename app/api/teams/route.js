@@ -23,6 +23,11 @@ export async function GET(request) {
 
     let query = {};
     if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        console.warn(`Invalid userId received in teams API: ${userId}`);
+        return NextResponse.json({ teams: [] });
+      }
+
       // Find teams where user is leader or member
       query = {
         $or: [
@@ -51,7 +56,7 @@ export async function POST(request) {
   const { isRateLimited } = limiter.check(5, ip); // 5 requests per minute per IP
 
   if (isRateLimited) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
   try {

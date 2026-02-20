@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db-connect";
 import Certificate from "@/models/Certificate";
 import Event from "@/models/Event";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 
 import PDFDocument from "pdfkit";
 import fs from "fs";

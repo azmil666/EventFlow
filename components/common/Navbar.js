@@ -14,6 +14,11 @@ export default function Navbar() {
 
   const { darkMode, toggleTheme } = useTheme();
 
+  // Debugging log for the browser
+  if (typeof window !== "undefined" && session) {
+    // console.log("Navbar Session Data:", session.user);
+  }
+
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -75,16 +80,20 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {session ? (
               <>
-                {session.user?.avatarUrl ? (
+                {(session.user?.image || session.user?.avatarUrl) ? (
                   <Link
                     href="/profile"
                     className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/10 hover:border-neon-cyan/50 transition"
                     title="View Profile"
                   >
                     <img
-                      src={session.user.avatarUrl}
-                      alt={session.user.name}
+                      src={session.user.image || session.user.avatarUrl}
+                      alt={session.user.name || "User"}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error("Navbar Image Load Error:", e);
+                        e.target.style.display = 'none';
+                      }}
                     />
                   </Link>
                 ) : (

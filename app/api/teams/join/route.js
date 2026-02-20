@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db-connect";
 import Team from "@/models/Team";
 import User from "@/models/User";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 

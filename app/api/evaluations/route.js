@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/db-connect";
 import Evaluation from "@/models/Evaluation";
 import Submission from "@/models/Submission";
