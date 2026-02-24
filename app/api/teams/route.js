@@ -5,6 +5,9 @@ import User from "@/models/User";
 import Event from "@/models/Event";
 import mongoose from "mongoose";
 import { auth } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ interval: 60000 });
 
 // GET all teams
 export async function GET(request) {
@@ -12,9 +15,10 @@ export async function GET(request) {
     await dbConnect();
     const { searchParams } = new URL(request.url);
     let userId = searchParams.get('userId');
+    const eventId = searchParams.get('eventId');
 
     // If no userId in query params, try to get from session
-    if (!userId) {
+    if (!userId && !eventId) {
       const session = await auth();
       if (session?.user?.id) {
         userId = session.user.id;
@@ -35,12 +39,17 @@ export async function GET(request) {
           { members: userId }
         ]
       };
+    } else if (eventId) {
+      if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        return NextResponse.json({ error: "Invalid eventId" }, { status: 400 });
+      }
+      query = { event: eventId, isLookingForMembers: true };
     }
 
     const teams = await Team.find(query)
       .populate('leader', 'name email role')
       .populate('members', 'name email role')
-      .populate('event', 'title startDate endDate description')
+      .populate('event', 'title startDate endDate description maxTeamSize')
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ teams });

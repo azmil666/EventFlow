@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Users, Clock, Check, Link2, Twitter, Linkedin, Facebook, MessageCircle } from "lucide-react";
+import CountdownTimer from "@/components/common/CountdownTimer";
 
 export default function EventDetailsPage() {
     const params = useParams();
@@ -101,7 +102,16 @@ export default function EventDetailsPage() {
                 </Link>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="h-48 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                    <div className="h-64 bg-gradient-to-r from-indigo-500 to-purple-600 relative overflow-hidden">
+                        {/* Abstract background element */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400/20 rounded-full -ml-20 -mb-20 blur-2xl"></div>
+                        
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                            <h2 className="text-white/80 text-sm font-bold uppercase tracking-widest mb-4">Event Starts In</h2>
+                            <CountdownTimer targetDate={event.startDate} />
+                        </div>
+                    </div>
                     <div className="px-8 py-8">
                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                             <div>
