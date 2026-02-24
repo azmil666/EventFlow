@@ -14,8 +14,10 @@ import {
   ExternalLink,
   User,
   LayoutGrid,
-  Search
+  Search,
+  ChevronRight
 } from "lucide-react";
+import TeamBoard from "@/components/dashboards/TeamBoard";
 import useFocusTrap from "@/components/common/useFocusTrap";
 import { handleTabListKeyDown } from "@/components/common/keyboardNavigation";
 
@@ -24,7 +26,7 @@ export default function ParticipantDashboard() {
   const user = session?.user;
 
   // State for tabs
-  const [activeTab, setActiveTab] = useState("browse"); // "browse" | "joined"
+  const [activeTab, setActiveTab] = useState("browse"); // "browse" | "teamboard" | "joined"
 
   // Data states
   const [myTeams, setMyTeams] = useState([]); // Array of teams user is part of
@@ -58,6 +60,7 @@ export default function ParticipantDashboard() {
   // Form states
   const [newTeamName, setNewTeamName] = useState("");
   const [selectedEventId, setSelectedEventId] = useState(""); // For team creation
+  const [teamBoardEventId, setTeamBoardEventId] = useState(""); // For team board filtering
   const [joinCode, setJoinCode] = useState("");
 
   // Fetch data
@@ -234,6 +237,14 @@ export default function ParticipantDashboard() {
               Available Events
             </button>
             <button
+              onClick={() => setActiveTab("teamboard")}
+              className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === "teamboard" ? "border-white text-white" : "border-transparent text-blue-200 hover:text-white"
+                }`}
+            >
+              <Users className="w-4 h-4" />
+              Team Board
+            </button>
+            <button
               onClick={() => setActiveTab("joined")}
               id="participant-tab-joined"
               role="tab"
@@ -328,6 +339,57 @@ export default function ParticipantDashboard() {
                 })
               )}
             </div>
+          </div>
+        )}
+
+        {/* TEAM BOARD TAB */}
+        {activeTab === "teamboard" && (
+          <div className="animate-in fade-in duration-300">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">Team Board</h2>
+                <p className="text-slate-500 text-sm mt-1">Find open teams or solo participants for your event.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-semibold text-slate-700">Select Event:</label>
+                <select 
+                  value={teamBoardEventId}
+                  onChange={(e) => setTeamBoardEventId(e.target.value)}
+                  className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none shadow-sm transition-all"
+                >
+                  <option value="">Choose an event...</option>
+                  {events.map(event => (
+                    <option key={event._id} value={event._id}>{event.title}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {teamBoardEventId ? (
+              <TeamBoard eventId={teamBoardEventId} userId={user?.id} />
+            ) : (
+              <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">
+                <div className="max-w-md mx-auto">
+                    <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Users className="w-10 h-10 text-blue-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Ready to find a team?</h3>
+                    <p className="text-slate-500 mb-8">Please select a hackathon from the dropdown above to see teams looking for members.</p>
+                    <div className="flex flex-col gap-3">
+                        {events.slice(0, 3).map(event => (
+                            <button 
+                                key={event._id}
+                                onClick={() => setTeamBoardEventId(event._id)}
+                                className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl hover:bg-white hover:border-blue-200 hover:shadow-md transition-all group"
+                            >
+                                <span className="font-semibold text-slate-700 group-hover:text-blue-600">{event.title}</span>
+                                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
