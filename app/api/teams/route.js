@@ -5,6 +5,9 @@ import User from "@/models/User";
 import Event from "@/models/Event";
 import mongoose from "mongoose";
 import { auth } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ interval: 60000 });
 
 // GET all teams
 export async function GET(request) {
