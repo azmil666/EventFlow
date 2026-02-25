@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import AssignJudgesModal from "@/components/dashboards/organizer/AssignJudgesModal";
 import CertificateDesigner from "@/components/dashboards/organizer/CertificateDesigner";
+import ParticipantList from "@/components/dashboards/organizer/ParticipantList";
 
 export default function EventDashboard() {
     const params = useParams(); // useParams returns a readonly object, not a Promise in Client Components
@@ -391,43 +392,12 @@ export default function EventDashboard() {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-3">
-                                            <div className="border-t border-slate-100 pt-3">
-                                                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider block mb-3">Team Members</span>
-
-                                                <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
-                                                    {/* Leader */}
-                                                    <div className="flex items-center justify-between group">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-xs text-amber-700 font-bold shrink-0">
-                                                                {team.leader?.name?.charAt(0)}
-                                                            </div>
-                                                            <span className="text-sm font-medium text-slate-900 truncate max-w-[120px]" title={team.leader?.name}>{team.leader?.name}</span>
-                                                        </div>
-                                                        <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Leader</span>
-                                                    </div>
-
-                                                    {/* Members */}
-                                                    {team.members?.map((member) => (
-                                                        <div key={member._id} className="flex items-center gap-2">
-                                                            <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600 font-bold shrink-0">
-                                                                {member.name.charAt(0)}
-                                                            </div>
-                                                            <span className="text-sm text-slate-600 truncate max-w-[150px]" title={member.name}>{member.name}</span>
-                                                        </div>
-                                                    ))}
-
-                                                    {(!team.members || team.members.length === 0) && (
-                                                        <p className="text-xs text-slate-400 italic pl-8">No other members joined yet.</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                                    <ParticipantList team={team} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
                 )}
 
                 {activeTab === "certificates" && (
