@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Calendar, Users, Trophy, ArrowRight, Star, MapPin, Search, FilterX, Twitter, Linkedin, Facebook, MessageCircle, Link2, Check, CalendarPlus } from "lucide-react";
+import { Calendar, Users, Trophy, ArrowRight, Star, MapPin, Search, FilterX, Twitter, Linkedin, Facebook, MessageCircle, Link2, Check, CalendarPlus, Bookmark } from "lucide-react";
 import Navbar from "@/components/common/Navbar";
 import Aurora from "@/components/common/Aurora";
 import { downloadICS } from "@/utils/generateICS";
+import { getBookmarks, addBookmark, removeBookmark } from "@/utils/bookmarks";
 
 export default function EventsPage() {
     const [events, setEvents] = useState([]);
@@ -15,6 +16,13 @@ export default function EventsPage() {
     const [category, setCategory] = useState("");
     const [location, setLocation] = useState("");
     const [copiedId, setCopiedId] = useState(null);
+    const [bookmarks, setBookmarks] = useState([]);
+    const [showBookmarked, setShowBookmarked] = useState(false);
+
+    // Load bookmarks on mount
+    useEffect(() => {
+        setBookmarks(getBookmarks());
+    }, []);
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -96,21 +104,32 @@ export default function EventsPage() {
         }, `eventflow-${event.id}`);
     };
 
+    const handleToggleBookmark = (eventId, e) => {
+        e.stopPropagation();
+        if (bookmarks.includes(eventId)) {
+            setBookmarks(removeBookmark(eventId));
+        } else {
+            setBookmarks(addBookmark(eventId));
+        }
+    };
+
     const clearFilters = () => {
         setSearchTerm("");
         setCategory("");
         setLocation("");
+        setShowBookmarked(false);
     };
 
-    const hasActiveFilters = searchTerm || category || location;
+    const hasActiveFilters = searchTerm || category || location || showBookmarked;
 
     const filteredEvents = events.filter((event) => {
         const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                               event.description.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = category ? event.category === category : true;
         const matchesLocation = location ? event.location.includes(location) : true;
+        const matchesBookmark = showBookmarked ? bookmarks.includes(event.id) : true;
         
-        return matchesSearch && matchesCategory && matchesLocation;
+        return matchesSearch && matchesCategory && matchesLocation && matchesBookmark;
     });
 
     const categories = Array.from(new Set(events.map(e => e.category)));
@@ -198,6 +217,17 @@ export default function EventsPage() {
                                     Clear All
                                 </button>
                             )}
+                            <button
+                                onClick={() => setShowBookmarked(!showBookmarked)}
+                                className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl transition-all duration-300 font-medium whitespace-nowrap ${
+                                    showBookmarked 
+                                        ? 'bg-neon-violet/20 text-neon-violet border-neon-violet/30 hover:bg-neon-violet/30'
+                                        : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/30 hover:text-white'
+                                }`}
+                            >
+                                <Bookmark className={`w-4 h-4 ${showBookmarked ? 'fill-current' : ''}`} />
+                                {showBookmarked ? 'Show All' : 'Watch Later'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -224,7 +254,7 @@ export default function EventsPage() {
                                     className="glass-card border-glow p-8 rounded-2xl transition-all duration-400 group hover:scale-[1.02] cursor-pointer"
                                     style={{ animationDelay: `${index * 100}ms` }}
                                 >
-                                    {/* Status Badge */}
+                                    {/* Status Badge & Bookmark */}
                                     <div className="flex items-center justify-between mb-4">
                                         <span className={`text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full ${event.status === "Registration Open"
                                                 ? "bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30"
@@ -236,9 +266,17 @@ export default function EventsPage() {
                                             }`}>
                                             {event.status}
                                         </span>
-                                        <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                                            {event.participants} Participants
-                                        </span>
+                                        <button
+                                            onClick={(e) => handleToggleBookmark(event.id, e)}
+                                            className={`p-2 rounded-lg border transition-all duration-300 ${
+                                                bookmarks.includes(event.id)
+                                                    ? 'border-neon-violet/50 bg-neon-violet/20 text-neon-violet'
+                                                    : 'border-white/10 hover:border-neon-violet/50 hover:bg-neon-violet/10 text-slate-400 hover:text-neon-violet'
+                                            }`}
+                                            title={bookmarks.includes(event.id) ? "Remove from Watch Later" : "Add to Watch Later"}
+                                        >
+                                            <Bookmark className={`w-4 h-4 ${bookmarks.includes(event.id) ? 'fill-current' : ''}`} />
+                                        </button>
                                     </div>
 
                                     {/* Event Title */}
