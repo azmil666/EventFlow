@@ -41,7 +41,9 @@ export default function Tooltip({ content, children }: TooltipProps) {
         <div
           role="tooltip"
  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 text-xs rounded-md bg-gray-900 text-white shadow-lg z-50 max-w-xs whitespace-nowrap"        >
+        style={{ whiteSpace: "nowrap" }}
           {content}
+          
         </div>
       )}
     </div>
