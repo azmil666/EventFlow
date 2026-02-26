@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Users, Clock, Check, Link2, Twitter, Linkedin, Facebook, MessageCircle, CalendarPlus } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Clock, Check, Link2, Twitter, Linkedin, Facebook, MessageCircle, CalendarPlus, ChevronDown } from "lucide-react";
 import CountdownTimer from "@/components/common/CountdownTimer";
-import { downloadICS } from "@/utils/generateICS";
+import { downloadICS, downloadICSFromAPI, openInGoogleCalendar } from "@/utils/generateICS";
 
 export default function EventDetailsPage() {
     const params = useParams();
@@ -24,6 +24,9 @@ export default function EventDetailsPage() {
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [copiedLink, setCopiedLink] = useState(false);
+    const [calendarMenuOpen, setCalendarMenuOpen] = useState(false);
+    const [downloadError, setDownloadError] = useState(null);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(window.location.href);
@@ -52,16 +55,56 @@ export default function EventDetailsPage() {
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
     };
 
-    const handleAddToCalendar = () => {
-        if (event) {
-            downloadICS({
-                title: event.title,
-                description: event.description,
-                startDate: event.startDate,
-                endDate: event.endDate,
-                location: event.location || "Virtual",
-                registrationDeadline: event.registrationDeadline
-            }, `eventflow-${event._id}`);
+    /**
+     * Download ICS file using client-side generation
+     * Fast and doesn't require server resources
+     */
+    const handleDownloadICS = async () => {
+        if (!event) return;
+        
+        try {
+            setIsDownloading(true);
+            setDownloadError(null);
+            await downloadICS(event, `eventflow-${event._id}`);
+        } catch (error) {
+            console.error("Download error:", error);
+            setDownloadError(error.message || "Failed to download calendar file");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    /**
+     * Download ICS file from server API
+     * Useful for ensuring server-side processing
+     */
+    const handleDownloadICSFromAPI = async () => {
+        if (!event) return;
+        
+        try {
+            setIsDownloading(true);
+            setDownloadError(null);
+            await downloadICSFromAPI(event._id, event.title);
+        } catch (error) {
+            console.error("API download error:", error);
+            setDownloadError(error.message || "Failed to download calendar file from server");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    /**
+     * Open Google Calendar with event pre-filled
+     * Creates new event in user's Google Calendar
+     */
+    const handleAddToGoogleCalendar = () => {
+        try {
+            setDownloadError(null);
+            openInGoogleCalendar(event);
+            setCalendarMenuOpen(false);
+        } catch (error) {
+            console.error("Google Calendar error:", error);
+            setDownloadError(error.message || "Failed to open Google Calendar");
         }
     };
 
@@ -144,28 +187,71 @@ export default function EventDetailsPage() {
                                     </span>
                                 </div>
                             </div>
-                            {/* In the future, Apply button can logic specifically here too */}
                         </div>
 
-                        {/* Share This Event */}
-                        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
-                            <span className="text-sm text-slate-500 font-medium">Share:</span>
-                            <button
-                                onClick={handleAddToCalendar}
-                                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 transition-colors shadow-sm"
-                                title="Add to Calendar"
-                            >
-                                <CalendarPlus className="w-4 h-4" />
-                                Add to Calendar
-                            </button>
+                        {/* Error notification */}
+                        {downloadError && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                                {downloadError}
+                            </div>
+                        )}
+
+                        {/* Share & Calendar Actions */}
+                        <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+                            <span className="text-sm text-slate-500 font-medium">Share & Add to Calendar:</span>
+                            
+                            {/* Calendar dropdown menu */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setCalendarMenuOpen(!calendarMenuOpen)}
+                                    disabled={isDownloading}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Download calendar file or open in calendar applications"
+                                >
+                                    <CalendarPlus className="w-4 h-4" />
+                                    Add to Calendar
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Dropdown submenu */}
+                                {calendarMenuOpen && (
+                                    <div className="absolute top-full mt-1 left-0 bg-white border border-slate-200 rounded-lg shadow-lg z-10 min-w-48">
+                                        <button
+                                            onClick={handleDownloadICS}
+                                            disabled={isDownloading}
+                                            className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 border-b border-slate-100 disabled:opacity-50"
+                                        >
+                                            📥 {isDownloading ? 'Downloading...' : 'Download .ics File'}
+                                        </button>
+                                        <button
+                                            onClick={handleDownloadICSFromAPI}
+                                            disabled={isDownloading}
+                                            className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 border-b border-slate-100 disabled:opacity-50"
+                                        >
+                                            🔗 {isDownloading ? 'Loading...' : 'Download via Server'}
+                                        </button>
+                                        <button
+                                            onClick={handleAddToGoogleCalendar}
+                                            disabled={isDownloading}
+                                            className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                                        >
+                                            📅 Add to Google Calendar
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Copy link button */}
                             <button
                                 onClick={handleCopyLink}
                                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-white border border-slate-300 text-slate-700 hover:border-indigo-400 hover:text-indigo-600 transition-colors shadow-sm"
-                                title="Copy link"
+                                title="Copy event link to clipboard"
                             >
                                 {copiedLink ? <Check className="w-4 h-4 text-green-500" /> : <Link2 className="w-4 h-4" />}
                                 {copiedLink ? "Copied!" : "Copy Link"}
                             </button>
+
+                            {/* Social share buttons */}
                             <button
                                 onClick={handleShareTwitter}
                                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-white border border-slate-300 text-slate-700 hover:border-sky-400 hover:text-sky-500 transition-colors shadow-sm"
